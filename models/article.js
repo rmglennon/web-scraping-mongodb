@@ -8,14 +8,17 @@ var Schema = mongoose.Schema;
 var ArticleSchema = new Schema({
   // `name` must be unique and of type String
   title: {
-    type: String
+    type: String,
+    require: true
   },
   link: {
     type: String,
-    unique: true
+    unique: true,
+    require: true
   },
   intro: {
-    type: String
+    type: String,
+    require: true
   },
   // `notes` is an array that stores ObjectIds
   // The ref property links these ObjectIds to the Note model

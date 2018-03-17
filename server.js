@@ -37,34 +37,32 @@ app.get("/scrape", function(req, res) {
     var $ = cheerio.load(html);
     // For each element with a "title" class
     $("div.post-block").each(function(i, element) {
-      // Save the text and href of each link enclosed in the current element
 
       // use find to traverse all elements and children for the direct
       // trim() removes whitespace because the items return \n and \t before and after the text
       var title = $(element).find("a.post-block__title__link").text().trim();
       var link = $(element).find("a.post-block__title__link").attr("href");
       var intro = $(element).children(".post-block__content").text().trim();
-      // If this found element had both a title and a link
+
+      console.log(title, link, intro);
+      //If this found element had both a title and a link
       if (title && link && intro) {
         // Insert the data in the scrapedData db
-        db.Article.insert({
+        console.log("this is true");
+        db.Article.create({
             title: title,
             link: link,
             intro: intro
-          },
-          function(err, inserted) {
-            if (err) {
-              // Log the error if one is encountered during the query
-              console.log(err);
-            } else {
-              // Otherwise, log the inserted data
-              console.log(inserted);
-            }
+          })
+          .then(function(dbArticle) {
+            console.log(dbArticle);
+          })
+          .catch(function(err) {
+            console.log(err.message);
           });
       }
     });
   });
-
   // Send a "Scrape Complete" message to the browser
   res.send("Scrape Complete");
 });
@@ -87,6 +85,22 @@ app.get("/notes", function(req, res) {
 app.get("/articles", function(req, res) {
   // Find all Users
   db.Article.find({})
+    .then(function(dbArticle) {
+      // If all Users are successfully found, send them back to the client
+      res.json(dbArticle);
+    })
+    .catch(function(err) {
+      // If an error occurs, send the error back to the client
+      res.json(err);
+    });
+});
+
+// Route for retrieving all saved from the db
+app.get("/articles", function(req, res) {
+  // Find all Users
+  db.Article.find({
+      saved: "true"
+    })
     .then(function(dbArticle) {
       // If all Users are successfully found, send them back to the client
       res.json(dbArticle);
