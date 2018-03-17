@@ -15,23 +15,19 @@ var databaseUrl = "news";
 var collections = ["scrapedNews"];
 
 // Use body-parser for handling form submissions
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 // Use express.static to serve the public folder as a static directory
 app.use(express.static("public"));
 
 // By default mongoose uses callbacks for async queries, we're setting it to use promises (.then syntax) instead
 // Connect to the Mongo DB
 mongoose.Promise = Promise;
-mongoose.connect("mongodb://localhost/populatedb2", {
-  useMongoClient: true
-});
+mongoose.connect("mongodb://localhost/news");
 
 // Hook mongojs configuration to the db variable
 var db = require("./models");
-db.on("error", function(error) {
-  console.log("Database Error:", error);
-});
-
 
 // Scrape data from one site and place it into the mongodb db
 app.get("/scrape", function(req, res) {
@@ -42,7 +38,7 @@ app.get("/scrape", function(req, res) {
     // For each element with a "title" class
     $("div.post-block").each(function(i, element) {
       // Save the text and href of each link enclosed in the current element
-      
+
       // use find to traverse all elements and children for the direct
       // trim() removes whitespace because the items return \n and \t before and after the text
       var title = $(element).find("a.post-block__title__link").text().trim();
@@ -51,21 +47,20 @@ app.get("/scrape", function(req, res) {
       // If this found element had both a title and a link
       if (title && link && intro) {
         // Insert the data in the scrapedData db
-        db.scrapedNews.insert({
-          title: title,
-          link: link,
-          intro: intro
-        },
-        function(err, inserted) {
-          if (err) {
-            // Log the error if one is encountered during the query
-            console.log(err);
-          }
-          else {
-            // Otherwise, log the inserted data
-            console.log(inserted);
-          }
-        });
+        db.Article.insert({
+            title: title,
+            link: link,
+            intro: intro
+          },
+          function(err, inserted) {
+            if (err) {
+              // Log the error if one is encountered during the query
+              console.log(err);
+            } else {
+              // Otherwise, log the inserted data
+              console.log(inserted);
+            }
+          });
       }
     });
   });
@@ -73,6 +68,77 @@ app.get("/scrape", function(req, res) {
   // Send a "Scrape Complete" message to the browser
   res.send("Scrape Complete");
 });
+
+// Route for retrieving all Notes from the db
+app.get("/notes", function(req, res) {
+  // Find all Notes
+  db.Note.find({})
+    .then(function(dbNote) {
+      // If all Notes are successfully found, send them back to the client
+      res.json(dbNote);
+    })
+    .catch(function(err) {
+      // If an error occurs, send the error back to the client
+      res.json(err);
+    });
+});
+
+// Route for retrieving all Users from the db
+app.get("/articles", function(req, res) {
+  // Find all Users
+  db.Article.find({})
+    .then(function(dbArticle) {
+      // If all Users are successfully found, send them back to the client
+      res.json(dbArticle);
+    })
+    .catch(function(err) {
+      // If an error occurs, send the error back to the client
+      res.json(err);
+    });
+});
+
+// Route for saving a new Note to the db and associating it with a User
+app.post("/submit", function(req, res) {
+  // Create a new Note in the db
+  db.Note.create(req.body)
+    .then(function(dbNote) {
+      // If a Note was created successfully, find one User (there's only one) and push the new Note's _id to the User's `notes` array
+      // { new: true } tells the query that we want it to return the updated User -- it returns the original by default
+      // Since our mongoose query returns a promise, we can chain another `.then` which receives the result of the query
+      return db.Article.findOneAndUpdate({}, {
+        $push: {
+          notes: dbNote._id
+        }
+      }, {
+        new: true
+      });
+    })
+    .then(function(dbArticle) {
+      // If the User was updated successfully, send it back to the client
+      res.json(dbArticle);
+    })
+    .catch(function(err) {
+      // If an error occurs, send it back to the client
+      res.json(err);
+    });
+});
+
+// Route to get all User's and populate them with their notes
+app.get("/populateduser", function(req, res) {
+  // Find all users
+  db.Article.find({})
+    // Specify that we want to populate the retrieved users with any associated notes
+    .populate("notes")
+    .then(function(dbArticle) {
+      // If able to successfully find and associate all Users and Notes, send them back to the client
+      res.json(dbArticle);
+    })
+    .catch(function(err) {
+      // If an error occurs, send it back to the client
+      res.json(err);
+    });
+});
+
 
 
 // Listen on port 3000
