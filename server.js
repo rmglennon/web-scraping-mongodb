@@ -5,7 +5,7 @@ var mongoose = require("mongoose");
 var request = require("request");
 var cheerio = require("cheerio");
 var bodyParser = require("body-parser");
-var handlebars = require("express-handlebars");
+var exphbs = require("express-handlebars");
 
 // Initialize Express
 var app = express();
@@ -25,6 +25,9 @@ app.use(express.static("public"));
 // Connect to the Mongo DB
 mongoose.Promise = Promise;
 mongoose.connect("mongodb://localhost/news");
+
+app.engine("handlebars", exphbs({ defaultLayout: "main" }));
+app.set("view engine", "handlebars");
 
 // Hook mongojs configuration to the db variable
 var db = require("./models");
