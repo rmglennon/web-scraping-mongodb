@@ -14,6 +14,18 @@ var app = express();
 var databaseUrl = "news";
 var collections = ["scrapedNews"];
 
+// Use body-parser for handling form submissions
+app.use(bodyParser.urlencoded({ extended: true }));
+// Use express.static to serve the public folder as a static directory
+app.use(express.static("public"));
+
+// By default mongoose uses callbacks for async queries, we're setting it to use promises (.then syntax) instead
+// Connect to the Mongo DB
+mongoose.Promise = Promise;
+mongoose.connect("mongodb://localhost/populatedb2", {
+  useMongoClient: true
+});
+
 // Hook mongojs configuration to the db variable
 var db = require("./models");
 db.on("error", function(error) {
