@@ -26,7 +26,9 @@ app.use(express.static("public"));
 mongoose.Promise = Promise;
 mongoose.connect("mongodb://localhost/news");
 
-app.engine("handlebars", exphbs({ defaultLayout: "main" }));
+app.engine("handlebars", exphbs({
+  defaultLayout: "main"
+}));
 app.set("view engine", "handlebars");
 
 // Hook mongojs configuration to the db variable
@@ -47,11 +49,9 @@ app.get("/scrape", function(req, res) {
       var link = $(element).find("a.post-block__title__link").attr("href");
       var intro = $(element).children(".post-block__content").text().trim();
 
-      console.log(title, link, intro);
       //If this found element had both a title and a link
       if (title && link && intro) {
         // Insert the data in the scrapedData db
-        console.log("this is true");
         db.Article.create({
             title: title,
             link: link,
@@ -65,9 +65,12 @@ app.get("/scrape", function(req, res) {
           });
       }
     });
+
   });
   // Send a "Scrape Complete" message to the browser
-  res.send("Scrape Complete");
+  //res.redirect("/")
+  res.render("index");
+  //res.send("Scrape Complete");
 });
 
 // Route for retrieving all Notes from the db
@@ -85,12 +88,20 @@ app.get("/notes", function(req, res) {
 });
 
 // Route for retrieving all Users from the db
-app.get("/articles", function(req, res) {
+app.get("/hello", function(req, res) {
+
   // Find all Users
   db.Article.find({})
+
     .then(function(dbArticle) {
       // If all Users are successfully found, send them back to the client
-      res.json(dbArticle);
+      var hbsArticleObject = {
+         articles: dbArticle
+      };
+      console.log(dbArticle);
+      //  res.json(dbArticle);
+      //res.send("something!")
+      res.render("index", hbsArticleObject);
     })
     .catch(function(err) {
       // If an error occurs, send the error back to the client
@@ -98,8 +109,9 @@ app.get("/articles", function(req, res) {
     });
 });
 
+
 // Route for retrieving all saved from the db
-app.get("/articles", function(req, res) {
+app.get("/saved", function(req, res) {
   // Find all Users
   db.Article.find({
       saved: "true"
