@@ -108,18 +108,18 @@ app.get("/scrape", function(req, res) {
 
 
 // Route for retrieving all Notes from the db
-app.get("/notes", function(req, res) {
-  // Find all Notes
-  db.Note.find({})
-    .then(function(dbNote) {
-      // If all Notes are successfully found, send them back to the client
-      res.json(dbNote);
-    })
-    .catch(function(err) {
-      // If an error occurs, send the error back to the client
-      res.json(err);
-    });
-});
+// app.get("/notes", function(req, res) {
+//   // Find all Notes
+//   db.Note.find({})
+//     .then(function(dbNote) {
+//       // If all Notes are successfully found, send them back to the client
+//       res.json(dbNote);
+//     })
+//     .catch(function(err) {
+//       // If an error occurs, send the error back to the client
+//       res.json(err);
+//     });
+// });
 
 // Route for retrieving all saved from the db
 app.get("/saved", function(req, res) {
@@ -128,11 +128,7 @@ app.get("/saved", function(req, res) {
       saved: true
     })
     .then(function(dbArticle) {
-      // If all Users are successfully found, send them back to the client
-      //  res.json(dbArticle);
-      // var hbsArticleObject = {
-      //   articles: dbArticle
-      // }
+      // If all saved articles are successfully found, send them back to the client
       res.render("saved", {
         articles: dbArticle
       })
@@ -145,9 +141,6 @@ app.get("/saved", function(req, res) {
 
 // Route for retrieving all saved from the db
 app.put("/saved/:id", function(req, res) {
-  // var query = {
-  //   _id: req.params.id
-  // };
   db.Article.findByIdAndUpdate(
       req.params.id, {
         $set: req.body
@@ -155,11 +148,6 @@ app.put("/saved/:id", function(req, res) {
         new: true
       })
     .then(function(dbArticle) {
-      // If all Users are successfully found, send them back to the client
-      //  res.json(dbArticle);
-      // var hbsArticleObject = {
-      //   articles: dbArticle
-      // }
       res.render("saved", {
         articles: dbArticle
       })
@@ -170,7 +158,7 @@ app.put("/saved/:id", function(req, res) {
     });
 });
 
-// Route for retrieving all saved from the db
+// Route for retrieving all saved from the db and deleting them
 app.delete("/saved/:id", function(req, res) {
   var query = {
     _id: req.params.id
@@ -179,11 +167,6 @@ app.delete("/saved/:id", function(req, res) {
       query
     })
     .then(function(dbArticle) {
-      // If all Users are successfully found, send them back to the client
-      //  res.json(dbArticle);
-      // var hbsArticleObject = {
-      //   articles: dbArticle
-      // }
       res.render("index", {
         articles: dbArticle
       })
@@ -221,10 +204,12 @@ app.post("/submit", function(req, res) {
 });
 
 // Route to get all User's and populate them with their notes
-app.get("/populateduser", function(req, res) {
+app.get("/notes/:id", function(req, res) {
   // Find all users
-  db.Article.find({})
+  db.Article.findById(
+    req.params.id)
     // Specify that we want to populate the retrieved users with any associated notes
+
     .populate("notes")
     .then(function(dbArticle) {
       // If able to successfully find and associate all Users and Notes, send them back to the client

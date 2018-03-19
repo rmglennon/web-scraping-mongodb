@@ -2,15 +2,15 @@ $(document).ready(function() {
 
   createPage();
 
+  // load the page initially with articles
   function createPage() {
-    // Empty the article container, run an AJAX request for any unsaved headlines
     //  $(".article-container").empty();
     $.get("/articles").then(function(data) {
-      // If we have headlines, render them to the page
       console.log("the page is drawn!");
     });
-  }
+  };
 
+  // when the save button is clicked, get the article ID and set its saved property to true
   $(".save-btn").on("click", function(event) {
 
     var newSavedArticle = $(this).data();
@@ -22,15 +22,12 @@ $(document).ready(function() {
     }).then(
       function(data) {
         location.reload();
-        //createPage();
       }
     );
   });
 
   $(".scrape-new").on("click", function(event) {
     // event.preventDefault();
-    // 
-    // console.log("I was clicked");
     $.get("/scrape").then(
       function(data) {
         createPage();
@@ -38,55 +35,50 @@ $(document).ready(function() {
     );
   });
 
-  //$.get("/api/headlines?saved=false").then(function(data) 
-
+  // when the button to removed a saved article from the saved list, get the article ID and set its saved property back to false
   $(".unsave-btn").on("click", function(event) {
-
     var newUnsavedArticle = $(this).data();
     newUnsavedArticle.saved = false;
-  //  console.log(newUnsavedArticle.id);
-    console.log(newUnsavedArticle);
     $.ajax("/saved/" + newUnsavedArticle.id, {
       type: "PUT",
       data: newUnsavedArticle
     }).then(
       function(data) {
-        console.log("unsaved was clicked");
-        //createPage();
         location.reload();
       }
     );
-    
-    // _id: ObjectId("572f16439c0d3ffe0bc084a4")
   });
 
+  // when the add note button is clicked on the saved articles page, show a modal and save the note into the note collection
   $(".note-modal-btn").on("click", function(event) {
-
-    // var id = $(this).("_id");
-
-    console.log("I was clicked");
-    $.ajax("/submit", {
-      type: "PUT",
-      data: newSavedArticle
-    }).then(
-      function() {
-        // location.reload();
-        console.log("I was clicked 2");
+    var activeArticle = $(this).data();
+    $.get("/notes/" + activeArticle.id).then(
+      function(data) {
+        //location.reload();
+        console.log(data);
+        // use the article title from the response as the heading
+        var modalText = data.title;
+        $("#note-modal-title").text("Notes for article: " + data.title);
       }
     );
+
+    $("#add-note-modal").modal("toggle");
   });
 
   $(".note-save-btn").on("click", function(event) {
 
-    // var id = $(this).("_id");
-
-    console.log("I was clicked");
+    event.preventDefault();
+    var newNote = {
+      body: $("#note-body").val().trim()
+    }
+    console.log(newNote);
     $.ajax("/submit", {
-      type: "POST"
+      type: "POST",
+      data: newNote
     }).then(
-      function() {
-        // location.reload();
-        console.log("I was clicked 2");
+      function(data) {
+      location.reload();
+console.log("notes data ", data);
       }
     );
   });
