@@ -59,6 +59,9 @@ $(document).ready(function() {
         // use the article title from the response as the heading
         var modalText = data.title;
         $("#note-modal-title").text("Notes for article: " + data.title);
+        //$(".existing-notes-body").text(data.notes[0].body)
+        var test = data.notes[0].body;
+        console.log("data notes ", test);
       }
     );
 
@@ -71,16 +74,29 @@ $(document).ready(function() {
     var newNote = {
       body: $("#note-body").val().trim()
     }
-    console.log(newNote);
+  //  console.log(newNote);
     $.ajax("/submit", {
       type: "POST",
       data: newNote
     }).then(
       function(data) {
       location.reload();
-console.log("notes data ", data);
+//console.log("notes data ", data);
       }
     );
+  });
+  
+    $(".delete-note-modal").on("click", function(event) {
+      var activeNote = $(this).data();
+      $.delete("/notes/" + activeNote.id).then(
+        function(data) {
+          //location.reload();
+          console.log(data);
+          // use the article title from the response as the heading
+
+      //    var test = data.notes[0].body;
+      //    console.log(test);
+    })
   });
 
 });

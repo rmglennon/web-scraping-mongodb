@@ -21,11 +21,11 @@
         <h5 id="note-modal-title" class="modal-title"></h5>
       </div>
       <div class="modal-body container">
+        <p class="existing-notes-body"></p>
         <ul>
           {{#each notes}}
-          <li>
-            {{notes.body}}
-            <button type="button" class="btn btn-danger" data-id="{{id}}">Delete note</button>
+          <li>{{this.body}}
+            <button type="button" class="btn btn-danger delete-note-modal" data-id="{{this._id}}">Delete note</button>
           </li>
           {{/each}}
         </ul>

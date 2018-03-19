@@ -106,21 +106,6 @@ app.get("/scrape", function(req, res) {
   //res.send("Scrape Complete");
 });
 
-
-// Route for retrieving all Notes from the db
-// app.get("/notes", function(req, res) {
-//   // Find all Notes
-//   db.Note.find({})
-//     .then(function(dbNote) {
-//       // If all Notes are successfully found, send them back to the client
-//       res.json(dbNote);
-//     })
-//     .catch(function(err) {
-//       // If an error occurs, send the error back to the client
-//       res.json(err);
-//     });
-// });
-
 // Route for retrieving all saved from the db
 app.get("/saved", function(req, res) {
   // Find all Users
@@ -193,8 +178,44 @@ app.post("/submit", function(req, res) {
         new: true
       });
     })
-    .then(function(dbArticle) {
+    .then(function(dbNote) {
       // If the User was updated successfully, send it back to the client
+      console.log("submit ", dbNote.body);
+      // where .body represents the body field from the collection
+      res.json(dbNote.body);
+
+    })
+    .catch(function(err) {
+      // If an error occurs, send it back to the client
+      res.json(err);
+    });
+});
+
+// Route for retrieving all Notes from the db
+// app.get("/notes", function(req, res) {
+//   // Find all Notes
+//   db.Note.find({})
+//     .then(function(dbNote) {
+//       // If all Notes are successfully found, send them back to the client
+//       res.json(dbNote);
+//     })
+//     .catch(function(err) {
+//       // If an error occurs, send the error back to the client
+//       res.json(err);
+//     });
+// });
+
+// Route to get all User's and populate them with their notes
+app.get("/notes/:id", function(req, res) {
+  // Find all users
+  db.Article.findById(
+      req.params.id)
+    // Specify that we want to populate the retrieved users with any associated notes
+
+    .populate("notes")
+    .then(function(dbArticle) {
+      // If able to successfully find and associate all Users and Notes, send them back to the client
+      //console.log(dbArticle.notes);
       res.json(dbArticle);
     })
     .catch(function(err) {
@@ -203,20 +224,14 @@ app.post("/submit", function(req, res) {
     });
 });
 
-// Route to get all User's and populate them with their notes
-app.get("/notes/:id", function(req, res) {
-  // Find all users
-  db.Article.findById(
-    req.params.id)
-    // Specify that we want to populate the retrieved users with any associated notes
+app.delete("/notes/:id", function(req, res) {
 
-    .populate("notes")
+  db.Note.findByIdAndRemove(req.params.id)
     .then(function(dbArticle) {
-      // If able to successfully find and associate all Users and Notes, send them back to the client
       res.json(dbArticle);
     })
     .catch(function(err) {
-      // If an error occurs, send it back to the client
+      // If an error occurs, send the error back to the client
       res.json(err);
     });
 });
