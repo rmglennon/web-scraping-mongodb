@@ -1,0 +1,41 @@
+
+<div class="container">
+  <h1>Saved articles</h1>
+{{#each articles}}
+<div class="card bg-light mb-3">
+  <div class="card-body">
+    <h5 class="card-title">{{this.title}}</h5>
+    <p class="card-text">{{this.intro}}...</p>
+    <a href="{{this.link}}" class="card-link" target="_blank">View article</a>
+    <a href="" class="btn btn-primary unsave-btn">Remove from saved</a>
+    <a href="" class="btn btn-primary note-modal-btn">Add note</a>
+  </div>
+</div>
+{{/each}}
+</div>
+
+
+<div class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Notes for article: {{this.title}}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="/submit" method="post">
+      <input type="text" name="title" placeholder="Title">
+      <textarea type="text" name="body">Write Note Here</textarea>
+
+      <input type="submit">
+    </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary note-save-btn">Save note</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

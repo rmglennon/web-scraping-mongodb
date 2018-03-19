@@ -34,6 +34,34 @@ app.set("view engine", "handlebars");
 // Hook mongojs configuration to the db variable
 var db = require("./models");
 
+//TODO: why you no work?
+app.get("/", function(req, res) {
+  db.Article.find({})
+    .then(function(dbArticle) {
+      res.render("index", {
+        articles: dbArticle
+      });
+    });
+});
+
+// Route for retrieving all Users from the db
+app.get("/articles", function(req, res) {
+
+  // Find all Users
+  db.Article.find({
+      saved: false
+    })
+    .then(function(dbArticle) {
+      res.render("index", {
+        articles: dbArticle
+      });
+    })
+    .catch(function(err) {
+      // If an error occurs, send the error back to the client
+      res.json(err);
+    });
+});
+
 // Scrape data from one site and place it into the mongodb db
 app.get("/scrape", function(req, res) {
   // Make a request for the news section of ycombinator
@@ -57,11 +85,13 @@ app.get("/scrape", function(req, res) {
             link: link,
             intro: intro
           })
-          .then(function(dbArticle) {
-            console.log(dbArticle);
-          })
+          // .then(function(dbArticle) {
+          //   console.log(dbArticle);
+          //   //  res.render("index", hbsArticleObject);
+          // })
           .catch(function(err) {
-            console.log(err.message);
+            // If an error occurs, send the error back to the client
+            return res.json(err);
           });
       }
     });
@@ -69,7 +99,7 @@ app.get("/scrape", function(req, res) {
   });
   // Send a "Scrape Complete" message to the browser
   //res.redirect("/")
-  res.render("index");
+  res.render("index", dbArticle);
   //res.send("Scrape Complete");
 });
 
@@ -87,21 +117,19 @@ app.get("/notes", function(req, res) {
     });
 });
 
-// Route for retrieving all Users from the db
-app.get("/hello", function(req, res) {
-
+// Route for retrieving all saved from the db
+app.get("/saved", function(req, res) {
   // Find all Users
-  db.Article.find({})
-
+  db.Article.find({
+      saved: true
+    })
     .then(function(dbArticle) {
       // If all Users are successfully found, send them back to the client
-      var hbsArticleObject = {
-         articles: dbArticle
-      };
-      console.log(dbArticle);
       //  res.json(dbArticle);
-      //res.send("something!")
-      res.render("index", hbsArticleObject);
+      var hbsArticleObject = {
+        articles: dbArticle
+      }
+      res.render("saved", hbsArticleObject)
     })
     .catch(function(err) {
       // If an error occurs, send the error back to the client
@@ -109,16 +137,45 @@ app.get("/hello", function(req, res) {
     });
 });
 
-
 // Route for retrieving all saved from the db
-app.get("/saved", function(req, res) {
-  // Find all Users
-  db.Article.find({
-      saved: "true"
+app.put("/saved/:id", function(req, res) {
+  var query = {
+    _id: req.params.id
+  };
+  db.Article.findByIdAndUpdate({
+      query
+    }, {}, {
+      new: true
     })
     .then(function(dbArticle) {
       // If all Users are successfully found, send them back to the client
-      res.json(dbArticle);
+      //  res.json(dbArticle);
+      var hbsArticleObject = {
+        articles: dbArticle
+      }
+      res.render("saved", hbsArticleObject)
+    })
+    .catch(function(err) {
+      // If an error occurs, send the error back to the client
+      res.json(err);
+    });
+});
+
+// Route for retrieving all saved from the db
+app.delete("/saved/:id", function(req, res) {
+  var query = {
+    _id: req.params.id
+  };
+  db.Article.findByIdAndRemove({
+      query
+    })
+    .then(function(dbArticle) {
+      // If all Users are successfully found, send them back to the client
+      //  res.json(dbArticle);
+      var hbsArticleObject = {
+        articles: dbArticle
+      }
+      res.render("index", hbsArticleObject)
     })
     .catch(function(err) {
       // If an error occurs, send the error back to the client
@@ -167,8 +224,6 @@ app.get("/populateduser", function(req, res) {
       res.json(err);
     });
 });
-
-
 
 // Listen on port 3000
 app.listen(3000, function() {
