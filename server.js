@@ -48,11 +48,9 @@ var db = require("./models");
 app.get("/articles", function(req, res) {
 
   // Find all Users
-  db.Article.find(
-    {
+  db.Article.find({
       saved: false
-    }
-  )
+    })
     .then(function(dbArticle) {
       res.render("index", {
         articles: dbArticle
@@ -83,20 +81,19 @@ app.get("/scrape", function(req, res) {
       if (title && link && intro) {
         // Insert the data in the scrapedData db
         db.Article.create({
-          title: title,
-          link: link,
-          intro: intro
-        },
-        function(err, inserted) {
-          if (err) {
-            // Log the error if one is encountered during the query
-            console.log(err);
-          }
-          else {
-            // Otherwise, log the inserted data
-            console.log(inserted);
-          }
-        });
+            title: title,
+            link: link,
+            intro: intro
+          },
+          function(err, inserted) {
+            if (err) {
+              // Log the error if one is encountered during the query
+              console.log(err);
+            } else {
+              // Otherwise, log the inserted data
+              console.log(inserted);
+            }
+          });
       }
     });
 
@@ -148,14 +145,15 @@ app.get("/saved", function(req, res) {
 
 // Route for retrieving all saved from the db
 app.put("/saved/:id", function(req, res) {
-  var query = {
-    _id: req.params.id
-  };
-  db.Article.findByIdAndUpdate({
-      query
-    }, {}, {
-      new: true
-    })
+  // var query = {
+  //   _id: req.params.id
+  // };
+  db.Article.findByIdAndUpdate(
+      req.params.id, {
+        $set: req.body
+      }, {
+        new: true
+      })
     .then(function(dbArticle) {
       // If all Users are successfully found, send them back to the client
       //  res.json(dbArticle);

@@ -7,8 +7,8 @@
     <h5 class="card-title">{{this.title}}</h5>
     <p class="card-text">{{this.intro}}...</p>
     <a href="{{this.link}}" class="card-link" target="_blank">View article</a>
-    <a href="" class="btn btn-primary unsave-btn">Remove from saved</a>
-    <a href="" class="btn btn-primary note-modal-btn">Add note</a>
+    <a data-id="{{this._id}}" class="btn btn-primary unsave-btn">Remove from saved</a>
+    <a data-id="{{this._id}}" class="btn btn-primary note-modal-btn">Add note</a>
   </div>
 </div>
 {{/each}}

@@ -13,10 +13,10 @@ $(document).ready(function() {
 
   $(".save-btn").on("click", function(event) {
 
-    var newSavedArticle = $(this).data("id");
+    var newSavedArticle = $(this).data();
     newSavedArticle.saved = true;
     console.log("saved was clicked");
-    $.ajax("/articles", {
+    $.ajax("/saved/" + newSavedArticle.id, {
       type: "PUT",
       data: newSavedArticle
     }).then(
@@ -42,19 +42,22 @@ $(document).ready(function() {
 
   $(".unsave-btn").on("click", function(event) {
 
-        var newUnsavedArticle = $(this).data("id");
-newUnsavedArticle.saved = false;
-    console.log("I was clicked");
-    $.ajax("/articles/id", {
+    var newUnsavedArticle = $(this).data();
+    newUnsavedArticle.saved = false;
+  //  console.log(newUnsavedArticle.id);
+    console.log(newUnsavedArticle);
+    $.ajax("/saved/" + newUnsavedArticle.id, {
       type: "PUT",
       data: newUnsavedArticle
     }).then(
       function(data) {
         console.log("unsaved was clicked");
         //createPage();
-location.reload();
+        location.reload();
       }
     );
+    
+    // _id: ObjectId("572f16439c0d3ffe0bc084a4")
   });
 
   $(".note-modal-btn").on("click", function(event) {
