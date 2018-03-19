@@ -13,26 +13,24 @@ $(document).ready(function() {
 
   $(".save-btn").on("click", function(event) {
 
-    var id = $(this).data("id");
-    var newSavedArticle = {
-      saved: true
-    };
-    console.log("I was clicked");
-    $.ajax("/articles" + id, {
+    var newSavedArticle = $(this).data("id");
+    newSavedArticle.saved = true;
+    console.log("saved was clicked");
+    $.ajax("/articles", {
       type: "PUT",
       data: newSavedArticle
     }).then(
       function(data) {
-        // location.reload();
-        createPage();
+        location.reload();
+        //createPage();
       }
     );
   });
 
   $(".scrape-new").on("click", function(event) {
-    event.preventDefault();
-
-    console.log("I was clicked");
+    // event.preventDefault();
+    // 
+    // console.log("I was clicked");
     $.get("/scrape").then(
       function(data) {
         createPage();
@@ -44,16 +42,17 @@ $(document).ready(function() {
 
   $(".unsave-btn").on("click", function(event) {
 
-        var id = $(this).data("id");
-
+        var newUnsavedArticle = $(this).data("id");
+newUnsavedArticle.saved = false;
     console.log("I was clicked");
     $.ajax("/articles/id", {
-      type: "DELETE",
-      data: newSavedArticle
+      type: "PUT",
+      data: newUnsavedArticle
     }).then(
-      function() {
-        // location.reload();
-        console.log("I was clicked 2");
+      function(data) {
+        console.log("unsaved was clicked");
+        //createPage();
+location.reload();
       }
     );
   });

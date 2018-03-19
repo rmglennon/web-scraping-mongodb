@@ -35,22 +35,24 @@ app.set("view engine", "handlebars");
 var db = require("./models");
 
 //TODO: why you no work?
-app.get("/", function(req, res) {
-  db.Article.find({})
-    .then(function(dbArticle) {
-      res.render("index", {
-        articles: dbArticle
-      });
-    });
-});
+// app.get("/", function(req, res) {
+//   db.Article.find({})
+//     .then(function(dbArticle) {
+//       res.render("index", {
+//         articles: dbArticle
+//       });
+//     });
+// });
 
 // Route for retrieving all Users from the db
 app.get("/articles", function(req, res) {
 
   // Find all Users
-  db.Article.find({
+  db.Article.find(
+    {
       saved: false
-    })
+    }
+  )
     .then(function(dbArticle) {
       res.render("index", {
         articles: dbArticle
@@ -63,6 +65,7 @@ app.get("/articles", function(req, res) {
 });
 
 // Scrape data from one site and place it into the mongodb db
+
 app.get("/scrape", function(req, res) {
   // Make a request for the news section of ycombinator
   request("https://techcrunch.com/", function(error, response, html) {
@@ -77,31 +80,35 @@ app.get("/scrape", function(req, res) {
       var link = $(element).find("a.post-block__title__link").attr("href");
       var intro = $(element).children(".post-block__content").text().trim();
 
-      //If this found element had both a title and a link
       if (title && link && intro) {
         // Insert the data in the scrapedData db
         db.Article.create({
-            title: title,
-            link: link,
-            intro: intro
-          })
-          // .then(function(dbArticle) {
-          //   console.log(dbArticle);
-          //   //  res.render("index", hbsArticleObject);
-          // })
-          .catch(function(err) {
-            // If an error occurs, send the error back to the client
-            return res.json(err);
-          });
+          title: title,
+          link: link,
+          intro: intro
+        },
+        function(err, inserted) {
+          if (err) {
+            // Log the error if one is encountered during the query
+            console.log(err);
+          }
+          else {
+            // Otherwise, log the inserted data
+            console.log(inserted);
+          }
+        });
       }
     });
 
   });
   // Send a "Scrape Complete" message to the browser
   //res.redirect("/")
-  res.render("index", dbArticle);
+  res.render("index", {
+    articles: dbArticle
+  });
   //res.send("Scrape Complete");
 });
+
 
 // Route for retrieving all Notes from the db
 app.get("/notes", function(req, res) {
@@ -126,10 +133,12 @@ app.get("/saved", function(req, res) {
     .then(function(dbArticle) {
       // If all Users are successfully found, send them back to the client
       //  res.json(dbArticle);
-      var hbsArticleObject = {
+      // var hbsArticleObject = {
+      //   articles: dbArticle
+      // }
+      res.render("saved", {
         articles: dbArticle
-      }
-      res.render("saved", hbsArticleObject)
+      })
     })
     .catch(function(err) {
       // If an error occurs, send the error back to the client
@@ -150,10 +159,12 @@ app.put("/saved/:id", function(req, res) {
     .then(function(dbArticle) {
       // If all Users are successfully found, send them back to the client
       //  res.json(dbArticle);
-      var hbsArticleObject = {
+      // var hbsArticleObject = {
+      //   articles: dbArticle
+      // }
+      res.render("saved", {
         articles: dbArticle
-      }
-      res.render("saved", hbsArticleObject)
+      })
     })
     .catch(function(err) {
       // If an error occurs, send the error back to the client
@@ -172,10 +183,12 @@ app.delete("/saved/:id", function(req, res) {
     .then(function(dbArticle) {
       // If all Users are successfully found, send them back to the client
       //  res.json(dbArticle);
-      var hbsArticleObject = {
+      // var hbsArticleObject = {
+      //   articles: dbArticle
+      // }
+      res.render("index", {
         articles: dbArticle
-      }
-      res.render("index", hbsArticleObject)
+      })
     })
     .catch(function(err) {
       // If an error occurs, send the error back to the client
