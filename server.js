@@ -34,27 +34,26 @@ app.set("view engine", "handlebars");
 // Hook mongojs configuration to the db variable
 var db = require("./models");
 
-//TODO: why you no work?
-// app.get("/", function(req, res) {
-//   db.Article.find({})
-//     .then(function(dbArticle) {
-//       res.render("index", {
-//         articles: dbArticle
-//       });
-//     });
-// });
-
-// Route for retrieving all Users from the db
-app.get("/articles", function(req, res) {
+// Route for retrieving all articles from the db
+app.get("/", function(req, res) {
 
   // Find all Users
+  // sort them by descending ID so newest are on top
   db.Article.find({
       saved: false
+    }).sort({
+      _id: -1
     })
     .then(function(dbArticle) {
-      res.render("index", {
-        articles: dbArticle
-      });
+      if (dbArticle.length === 0) {
+        res.render("message", {
+          message: "There are no more articles available. Check again later."
+        });
+      } else {
+        res.render("index", {
+          articles: dbArticle
+        });
+      };
     })
     .catch(function(err) {
       // If an error occurs, send the error back to the client
@@ -99,10 +98,7 @@ app.get("/scrape", function(req, res) {
 
   });
   // Send a "Scrape Complete" message to the browser
-  //res.redirect("/")
-  res.render("index", {
-    articles: dbArticle
-  });
+  res.redirect("/")
   //res.send("Scrape Complete");
 });
 

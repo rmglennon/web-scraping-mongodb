@@ -14,6 +14,7 @@ $(document).ready(function() {
     //  $(".article-container").empty();
     $.get("/articles").then(function(data) {
       console.log("the page is drawn!");
+      console.log(data);
     });
   };
 
@@ -35,9 +36,15 @@ $(document).ready(function() {
 
   function scrapeArticles(event) {
     // event.preventDefault();
-    $.get("/scrape").then(
+//var articleCounter = 0;
+    $.ajax("/scrape", {
+      type: "GET"
+    }).then(
       function(data) {
-        createPage();
+        //newArticleCounter = data.length;
+        console.log(data.message);
+        //window.location = "/"
+        //createPage();
       }
     );
   };
@@ -81,12 +88,15 @@ $(document).ready(function() {
       }
     );
 
-    $("#add-note-modal").modal("toggle");
+    if (!$("#add-note-modal").data("bs.modal")) {
+      $("#add-note-modal").modal("toggle");
+    }
   };
 
   function saveNote(event) {
 
     event.preventDefault();
+    
     var newNote = {
       body: $("#note-body").val().trim()
     }
@@ -96,8 +106,9 @@ $(document).ready(function() {
       data: newNote
     }).then(
       function(data) {
-        window.location.reload(true);
+        //  window.location.reload(true);
         //console.log("notes data ", data);
+        createNotesModal();
       }
     );
   };
