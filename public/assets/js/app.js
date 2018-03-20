@@ -59,9 +59,16 @@ $(document).ready(function() {
         // use the article title from the response as the heading
         var modalText = data.title;
         $("#note-modal-title").text("Notes for article: " + data.title);
-        //$(".existing-notes-body").text(data.notes[0].body)
-        var test = data.notes[0].body;
-        console.log("data notes ", test);
+        var noteItem;
+        var noteDeleteBtn;
+        for (var i = 0; i < data.notes.length; i ++) {
+          noteItem = $("<li>").text(data.notes[i].body);
+        //  noteItem.data("id", data.notes[i]._id);
+          noteDeleteBtn = $("<button> Delete </button>").addClass("btn btn-danger delete-note-modal");
+          noteDeleteBtn.attr("id", data.notes[i]._id);
+          noteItem.prepend(noteDeleteBtn);
+          $(".notes-list").append(noteItem);
+        }
       }
     );
 
@@ -86,9 +93,14 @@ $(document).ready(function() {
     );
   });
   
-    $(".delete-note-modal").on("click", function(event) {
-      var activeNote = $(this).data();
-      $.delete("/notes/" + activeNote.id).then(
+    $(".notes-list").on("click", ".delete-note-modal", function(event) {
+    console.log("delete was clicked");
+      var activeNote = $(this.id);
+     console.log(activeNote);
+
+      $.ajax("/notes/" +      ObjectId.fromString(activeNote), {
+        type: "DELETE"
+      }).then(
         function(data) {
           //location.reload();
           console.log(data);

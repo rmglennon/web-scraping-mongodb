@@ -22,12 +22,7 @@
       </div>
       <div class="modal-body container">
         <p class="existing-notes-body"></p>
-        <ul>
-          {{#each notes}}
-          <li>{{this.body}}
-            <button type="button" class="btn btn-danger delete-note-modal" data-id="{{this._id}}">Delete note</button>
-          </li>
-          {{/each}}
+        <ul class="notes-list">
         </ul>
         <hr>
         <form action="/submit" method="post">

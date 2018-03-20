@@ -144,23 +144,23 @@ app.put("/saved/:id", function(req, res) {
 });
 
 // Route for retrieving all saved from the db and deleting them
-app.delete("/saved/:id", function(req, res) {
-  var query = {
-    _id: req.params.id
-  };
-  db.Article.findByIdAndRemove({
-      query
-    })
-    .then(function(dbArticle) {
-      res.render("index", {
-        articles: dbArticle
-      })
-    })
-    .catch(function(err) {
-      // If an error occurs, send the error back to the client
-      res.json(err);
-    });
-});
+// app.delete("/saved/:id", function(req, res) {
+//   var query = {
+//     _id: req.params.id
+//   };
+//   db.Article.findByIdAndRemove({
+//       query
+//     })
+//     .then(function(dbArticle) {
+//       res.render("index", {
+//         articles: dbArticle
+//       })
+//     })
+//     .catch(function(err) {
+//       // If an error occurs, send the error back to the client
+//       res.json(err);
+//     });
+// });
 
 // Route for saving a new Note to the db and associating it with a User
 app.post("/submit", function(req, res) {
