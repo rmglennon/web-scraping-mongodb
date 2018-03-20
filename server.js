@@ -28,7 +28,9 @@ app.use(express.static("public"));
 
 // use promises with Mongo and connect to the database
 mongoose.Promise = Promise;
-mongoose.connect("mongodb://localhost/news");
+
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/news";
+mongoose.connect(MONGODB_URI);
 
 // use handlebars
 app.engine("handlebars", exphbs({
