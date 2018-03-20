@@ -7,6 +7,8 @@ var cheerio = require("cheerio");
 var bodyParser = require("body-parser");
 var exphbs = require("express-handlebars");
 
+var PORT = process.env.PORT || 3000;
+
 // Initialize Express
 var app = express();
 
@@ -16,16 +18,19 @@ var collections = ["scrapedNews"];
 
 // Use body-parser for handling form submissions
 app.use(bodyParser.urlencoded({
-  extended: true
+  extended: false
 }));
-// Use express.static to serve the public folder as a static directory
+app.use(bodyParser.json({
+  type: "application/json"
+}));
+// serve the public directory
 app.use(express.static("public"));
 
-// By default mongoose uses callbacks for async queries, we're setting it to use promises (.then syntax) instead
-// Connect to the Mongo DB
+// use promises with Mongo and connect to the database
 mongoose.Promise = Promise;
 mongoose.connect("mongodb://localhost/news");
 
+// use handlebars
 app.engine("handlebars", exphbs({
   defaultLayout: "main"
 }));
@@ -34,35 +39,26 @@ app.set("view engine", "handlebars");
 // Hook mongojs configuration to the db variable
 var db = require("./models");
 
-// Route for retrieving all articles from the db
+// get all articles from the database (that are not saved)
 app.get("/", function(req, res) {
 
-  // Find all Users
-  // sort them by descending ID so newest are on top
+  // sort by descending ID so newest are on top
   db.Article.find({
       saved: false
-    }).sort({
-      _id: -1
-    })
-    .then(function(dbArticle) {
-      if (dbArticle.length === 0) {
-        res.render("message", {
-          message: "There are no more articles available. Check again later."
-        });
+    },
+
+    function(error, dbArticle) {
+      if (error) {
+        console.log(error);
       } else {
         res.render("index", {
           articles: dbArticle
         });
-      };
+      }
     })
-    .catch(function(err) {
-      // If an error occurs, send the error back to the client
-      res.json(err);
-    });
-});
+})
 
-// Scrape data from one site and place it into the mongodb db
-
+// use cheerio to scrape stories from TechCrunch and store them
 app.get("/scrape", function(req, res) {
   // Make a request for the news section of ycombinator
   request("https://techcrunch.com/", function(error, response, html) {
@@ -117,10 +113,11 @@ app.get("/saved", function(req, res) {
     .catch(function(err) {
       // If an error occurs, send the error back to the client
       res.json(err);
-    });
+    })
+  
 });
 
-// Route for retrieving all saved from the db
+// Route adding notes 
 app.put("/saved/:id", function(req, res) {
   db.Article.findByIdAndUpdate(
       req.params.id, {
@@ -187,21 +184,7 @@ app.post("/submit", function(req, res) {
     });
 });
 
-// Route for retrieving all Notes from the db
-// app.get("/notes", function(req, res) {
-//   // Find all Notes
-//   db.Note.find({})
-//     .then(function(dbNote) {
-//       // If all Notes are successfully found, send them back to the client
-//       res.json(dbNote);
-//     })
-//     .catch(function(err) {
-//       // If an error occurs, send the error back to the client
-//       res.json(err);
-//     });
-// });
-
-// Route to get all User's and populate them with their notes
+// Route to get all notes by ID
 app.get("/notes/:id", function(req, res) {
   // Find all users
   db.Article.findById(
@@ -220,16 +203,16 @@ app.get("/notes/:id", function(req, res) {
     });
 });
 
-app.delete("/notes/:id", function(req, res) {
+app.get("/notes/:id", function(req, res) {
 
-  db.Note.findByIdAndRemove(req.params.id)
-    .then(function(dbArticle) {
-      res.json(dbArticle);
-    })
-    .catch(function(err) {
-      // If an error occurs, send the error back to the client
-      res.json(err);
-    });
+  db.Note.findByIdAndRemove(req.params.id), function (error, data) {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log("Deleted note");
+        }
+        res.send(data);
+    };
 });
 
 // Listen on port 3000

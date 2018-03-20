@@ -12,15 +12,12 @@ $(document).ready(function() {
   // load the page initially with articles
   function createPage() {
     //  $(".article-container").empty();
-    $.get("/articles").then(function(data) {
-      console.log("the page is drawn!");
-      console.log(data);
-    });
+    $.get("/").then(function(data) {});
   };
 
   // when the save button is clicked, get the article ID and set its saved property to true
   function saveArticle(event) {
-
+    event.preventDefault();
     var newSavedArticle = $(this).data();
     newSavedArticle.saved = true;
     console.log("saved was clicked");
@@ -28,7 +25,7 @@ $(document).ready(function() {
       type: "PUT",
       data: newSavedArticle
     }).then(
-      function(data) {
+      function() {
         location.reload();
       }
     );
@@ -36,15 +33,15 @@ $(document).ready(function() {
 
   function scrapeArticles(event) {
     // event.preventDefault();
-//var articleCounter = 0;
+    //var articleCounter = 0;
     $.ajax("/scrape", {
       type: "GET"
     }).then(
-      function(data) {
+      function() {
         //newArticleCounter = data.length;
-        console.log(data.message);
+        // console.log(data.message);
         //window.location = "/"
-        //createPage();
+        createPage();
       }
     );
   };
@@ -96,21 +93,26 @@ $(document).ready(function() {
   function saveNote(event) {
 
     event.preventDefault();
-    
     var newNote = {
       body: $("#note-body").val().trim()
     }
-    //  console.log(newNote);
-    $.ajax("/submit", {
-      type: "POST",
-      data: newNote
-    }).then(
-      function(data) {
-        //  window.location.reload(true);
-        //console.log("notes data ", data);
-        createNotesModal();
-      }
-    );
+    if (newNote.body.length > 0) {
+      //  console.log(newNote);
+      $.ajax("/submit", {
+        type: "POST",
+        data: newNote
+      }).then(
+        function(data) {
+          //  window.location.reload(true);
+          //console.log("notes data ", data);
+          //  createNotesModal();
+        }
+      );
+      $("#add-note-modal").modal("toggle");
+    } else {
+      console.log("more chars");
+    }
+
   };
 
   $(".notes-list").on("click", ".delete-note-modal", function(event) {
@@ -119,11 +121,10 @@ $(document).ready(function() {
     console.log($(this).attr("id"));
 
     $.ajax("/notes/" + $(this).attr("id"), {
-      type: "DELETE"
+      type: "GET"
     }).then(
       function(data) {
-        location.reload();
-        console.log(data);
+        $(this).attr("id").remove();
         // use the article title from the response as the heading
 
         //    var test = data.notes[0].body;
