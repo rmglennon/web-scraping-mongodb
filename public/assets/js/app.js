@@ -1,12 +1,5 @@
 $(document).ready(function() {
 
-  $(document).on("click", ".save-btn", saveArticle);
-  $(document).on("click", ".scrape-new", scrapeArticles);
-  $(document).on("click", ".unsave-btn", removeFromSaved);
-  $(document).on("click", ".note-modal-btn", createNotesModal);
-  $(document).on("click", ".note-save-btn", saveNote);
-
-
   createPage();
 
   // load the page initially with articles
@@ -16,8 +9,8 @@ $(document).ready(function() {
   };
 
   // when the save button is clicked, get the article ID and set its saved property to true
-  function saveArticle(event) {
-    event.preventDefault();
+  $(".save-btn").on("click", function(event) {
+
     var newSavedArticle = $(this).data();
     newSavedArticle.saved = true;
     console.log("saved was clicked");
@@ -25,30 +18,24 @@ $(document).ready(function() {
       type: "PUT",
       data: newSavedArticle
     }).then(
-      function() {
+      function(data) {
         location.reload();
       }
     );
-  };
+  });
 
-  function scrapeArticles(event) {
+  $(".scrape-new").on("click", function(event) {
     // event.preventDefault();
-    //var articleCounter = 0;
-    $.ajax("/scrape", {
-      type: "GET"
-    }).then(
-      function() {
-        //newArticleCounter = data.length;
-        // console.log(data.message);
-        //window.location = "/"
+    $.get("/scrape").then(
+      function(data) {
         createPage();
       }
     );
-  };
+  });
 
   // when the button to removed a saved article from the saved list, get the article ID and set its saved property back to false
 
-  function removeFromSaved(event) {
+  $(".unsave-btn").on("click", function(event) {
     var newUnsavedArticle = $(this).data();
     newUnsavedArticle.saved = false;
     $.ajax("/saved/" + newUnsavedArticle.id, {
@@ -59,11 +46,11 @@ $(document).ready(function() {
         location.reload();
       }
     );
-  };
+  });
 
   // when the add note button is clicked on the saved articles page, show a modal and save the note into the note collection
 
-  function createNotesModal(event) {
+  $(".note-modal-btn").on("click", function(event) {
     var activeArticle = $(this).data();
     $.get("/notes/" + activeArticle.id).then(
       function(data) {
@@ -74,54 +61,48 @@ $(document).ready(function() {
         $("#note-modal-title").text("Notes for article: " + data.title);
         var noteItem;
         var noteDeleteBtn;
-        for (var i = 0; i < data.notes.length; i++) {
+        for (var i = 0; i < data.notes.length; i ++) {
           noteItem = $("<li>").text(data.notes[i].body);
-          //  noteItem.data("id", data.notes[i]._id);
+        //  noteItem.data("id", data.notes[i]._id);
           noteDeleteBtn = $("<button> Delete </button>").addClass("btn btn-danger delete-note-modal");
           noteDeleteBtn.attr("id", data.notes[i]._id);
-          noteItem.prepend(noteDeleteBtn);
+          noteItem.prepend(noteDeleteBtn, " ");
           $(".notes-list").append(noteItem);
         }
       }
     );
 
-    if (!$("#add-note-modal").data("bs.modal")) {
-      $("#add-note-modal").modal("toggle");
-    }
-  };
+    $("#add-note-modal").modal("toggle");
+  });
 
-  function saveNote(event) {
+  $(".note-save-btn").on("click", function(event) {
 
     event.preventDefault();
+        var activeArticle = $(this).data();
     var newNote = {
       body: $("#note-body").val().trim()
     }
-    if (newNote.body.length > 0) {
-      //  console.log(newNote);
-      $.ajax("/submit", {
-        type: "POST",
-        data: newNote
-      }).then(
-        function(data) {
-          //  window.location.reload(true);
-          //console.log("notes data ", data);
-          //  createNotesModal();
-        }
-      );
-      $("#add-note-modal").modal("toggle");
-    } else {
-      console.log("more chars");
-    }
-
-  };
+  //  console.log(newNote);
+    $.ajax("/submit/" + activeArticle.id, {
+      type: "POST",
+      data: newNote
+    }).then(
+      function(data) {
+      location.reload();
+//console.log("notes data ", data);
+      }
+    );
+  });
 
   $(".notes-list").on("click", ".delete-note-modal", function(event) {
     //console.log("delete was clicked");
     // var activeNote = $(this);
     console.log($(this).attr("id"));
+    
+    
 
     $.ajax("/notes/" + $(this).attr("id"), {
-      type: "GET"
+      type: "DELETE"
     }).then(
       function(data) {
         $(this).attr("id").remove();

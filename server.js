@@ -42,7 +42,6 @@ var db = require("./models");
 // get all articles from the database (that are not saved)
 app.get("/", function(req, res) {
 
-  // sort by descending ID so newest are on top
   db.Article.find({
       saved: false
     },
@@ -64,17 +63,15 @@ app.get("/scrape", function(req, res) {
   request("https://techcrunch.com/", function(error, response, html) {
     // Load the html body from request into cheerio
     var $ = cheerio.load(html);
-    // For each element with a "title" class
     $("div.post-block").each(function(i, element) {
 
-      // use find to traverse all elements and children for the direct
       // trim() removes whitespace because the items return \n and \t before and after the text
       var title = $(element).find("a.post-block__title__link").text().trim();
       var link = $(element).find("a.post-block__title__link").attr("href");
       var intro = $(element).children(".post-block__content").text().trim();
 
       if (title && link && intro) {
-        // Insert the data in the scrapedData db
+        // Insert the data
         db.Article.create({
             title: title,
             link: link,
@@ -93,14 +90,12 @@ app.get("/scrape", function(req, res) {
     });
 
   });
-  // Send a "Scrape Complete" message to the browser
   res.redirect("/")
-  //res.send("Scrape Complete");
 });
 
 // Route for retrieving all saved from the db
 app.get("/saved", function(req, res) {
-  // Find all Users
+  // Find all saved articles
   db.Article.find({
       saved: true
     })
@@ -136,34 +131,14 @@ app.put("/saved/:id", function(req, res) {
     });
 });
 
-// Route for retrieving all saved from the db and deleting them
-// app.delete("/saved/:id", function(req, res) {
-//   var query = {
-//     _id: req.params.id
-//   };
-//   db.Article.findByIdAndRemove({
-//       query
-//     })
-//     .then(function(dbArticle) {
-//       res.render("index", {
-//         articles: dbArticle
-//       })
-//     })
-//     .catch(function(err) {
-//       // If an error occurs, send the error back to the client
-//       res.json(err);
-//     });
-// });
-
-// Route for saving a new Note to the db and associating it with a User
-app.post("/submit", function(req, res) {
+// Route for saving a new Note to the db and associating it with an article
+app.post("/submit/:id", function(req, res) {
   // Create a new Note in the db
   db.Note.create(req.body)
     .then(function(dbNote) {
-      // If a Note was created successfully, find one User (there's only one) and push the new Note's _id to the User's `notes` array
-      // { new: true } tells the query that we want it to return the updated User -- it returns the original by default
-      // Since our mongoose query returns a promise, we can chain another `.then` which receives the result of the query
-      return db.Article.findOneAndUpdate({}, {
+      return db.Article.findOneAndUpdate({
+        _id: req.params.id
+      }, {
         $push: {
           notes: dbNote._id
         }
@@ -172,9 +147,8 @@ app.post("/submit", function(req, res) {
       });
     })
     .then(function(dbNote) {
-      // If the User was updated successfully, send it back to the client
       console.log("submit ", dbNote.body);
-      // where .body represents the body field from the collection
+
       res.json(dbNote.body);
 
     })
@@ -186,15 +160,10 @@ app.post("/submit", function(req, res) {
 
 // Route to get all notes by ID
 app.get("/notes/:id", function(req, res) {
-  // Find all users
   db.Article.findById(
       req.params.id)
-    // Specify that we want to populate the retrieved users with any associated notes
-
     .populate("notes")
     .then(function(dbArticle) {
-      // If able to successfully find and associate all Users and Notes, send them back to the client
-      //console.log(dbArticle.notes);
       res.json(dbArticle);
     })
     .catch(function(err) {
@@ -203,16 +172,17 @@ app.get("/notes/:id", function(req, res) {
     });
 });
 
-app.get("/notes/:id", function(req, res) {
 
-  db.Note.findByIdAndRemove(req.params.id), function (error, data) {
-        if (error) {
-            console.log(error);
-        } else {
-            console.log("Deleted note");
-        }
-        res.send(data);
-    };
+app.delete("/notes/:id", function(req, res) {
+
+  db.Note.findByIdAndRemove(req.params.id)
+    .then(function(dbArticle) {
+      res.json(dbArticle);
+    })
+    .catch(function(err) {
+      // If an error occurs, send the error back to the client
+      res.json(err);
+    });
 });
 
 // Listen on port 3000
