@@ -1,6 +1,6 @@
 # Scrape news headlines into MongoDB
 
-This is a full-stack JavaScript app built using MongoDB, Mongoose, Node.js, Express.js, Handlebars.js, HTML, and CSS. It scrapes the  [TechCrunch](https://techcrunch.com/) homepage and stores article titles and links, along with your notes and favorites, in MongoDB. 
+This is a full-stack JavaScript app built using MongoDB, Mongoose, Node.js, Express.js, Handlebars.js, HTML, and CSS. It scrapes the  [TechCrunch](https://techcrunch.com/) homepage and stores article titles and links, along with your notes and favorites, in MongoDB. The articles and notes collections reference each other through population.
 
 https://mongo-tech-news-scraper.herokuapp.com/
 
