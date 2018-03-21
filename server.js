@@ -191,16 +191,15 @@ app.get("/notes/article/:id", function(req, res) {
 });
 
 
-app.delete("/notes/:id", function(req, res) {
+app.get("/notes/:id", function(req, res) {
 
-  db.Note.findByIdAndRemove(req.params.id)
-    .then(function(dbArticle) {
-      res.json(dbArticle);
-    })
-    .catch(function(err) {
-      // If an error occurs, send the error back to the client
-      res.json(err);
-    });
+  db.Note.findOneAndRemove({_id:req.params.id}, function (error, data) {
+      if (error) {
+          console.log(error);
+      } else {
+      }
+      res.json(data);
+  });
 });
 
 // Listen on port 3000

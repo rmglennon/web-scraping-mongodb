@@ -15,8 +15,8 @@ $(document).ready(function() {
     var newSavedArticle = $(this).data();
     newSavedArticle.saved = true;
     console.log("saved was clicked");
-   var id = $(this).attr("data-articleID");
-    $.ajax("/saved/" + newSavedArticle.id, {
+   var id = $(this).attr("data-articleid");
+    $.ajax("/saved/" + id, {
       type: "PUT",
       data: newSavedArticle
     }).then(
@@ -40,9 +40,9 @@ $(document).ready(function() {
 
   $(".unsave-btn").on("click", function(event) {
     var newUnsavedArticle = $(this).data();
-    var id = $(this).attr("data-articleID");
+    var id = $(this).attr("data-articleid");
     newUnsavedArticle.saved = false;
-    $.ajax("/saved/" + newUnsavedArticle.id, {
+    $.ajax("/saved/" + id, {
       type: "PUT",
       data: newUnsavedArticle
     }).then(
@@ -63,9 +63,11 @@ $(document).ready(function() {
     console.log("data notes legnth ", data.notes.length )
     for (var i = 0; i < data.notes.length; i ++) {
       noteItem = $("<li>").text(data.notes[i].body);
+      noteItem.addClass("note-item-list");
+      noteItem.attr("id", data.notes[i]._id);
     //  noteItem.data("id", data.notes[i]._id);
       noteDeleteBtn = $("<button> Delete </button>").addClass("btn btn-danger delete-note-modal");
-      noteDeleteBtn.attr("id", data.notes[i]._id);
+      noteDeleteBtn.attr("data-noteId", data.notes[i]._id);
       noteItem.prepend(noteDeleteBtn, " ");
       $(".notes-list").append(noteItem);
     }
@@ -76,7 +78,7 @@ $(document).ready(function() {
   //  console.log("active article ", activeArticle.id);
   //  console.log(typeof activeArticle.id);
       var articleId = $(this).attr("data-articleId");
-              $("#add-note-modal").attr("data-articleID", articleId);
+              $("#add-note-modal").attr("data-articleId", articleId);
               $("#note-modal-title").empty();
               $(".notes-list").empty();
               $("#note-body").empty();
@@ -110,7 +112,7 @@ $(document).ready(function() {
   $(".note-save-btn").on("click", function(event) {
     
     event.preventDefault();
-    var articleId = $("#add-note-modal").attr("data-articleID")
+    var articleId = $("#add-note-modal").attr("data-articleId")
       // var activeArticle = $(this).data("id");
     //    console.log("active article: ", activeArticle);
     var newNote = {
@@ -128,23 +130,33 @@ console.log("notes data ", data);
     );
   });
 
-  $(".notes-list").on("click", ".delete-note-modal", function(event) {
+$(document).on("click", ".delete-note-modal", function(event) {
     //console.log("delete was clicked");
     // var activeNote = $(this);
-    console.log($(this).attr("id"));
-    
-    
+  //  console.log($(this).attr("id"));
+    var noteID = $(this).attr("data-noteId");
+    console.log(noteID);
 
-    $.ajax("/notes/" + $(this).attr("id"), {
-      type: "DELETE"
+    $.ajax("/notes/" + noteID, {
+      type: "GET"
     }).then(
       function(data) {
-        $(this).attr("id").remove();
+        $("#"+noteID).remove();
+      //  $(this).find(noteID).remove();
+        //console.log($(this).find(".note-item-list"));
         // use the article title from the response as the heading
-
+        
         //    var test = data.notes[0].body;
         //    console.log(test);
       })
   });
+  
+  
+//   $(document).on("click", ".delete-note", function(){
+//   var noteID = $(this).attr("data-noteId");
+//   $.get("/deletenote/"+noteID, function(data){
+//     $("#"+noteID).remove();
+//   });
+// });
 
 });
