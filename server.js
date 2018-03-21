@@ -88,11 +88,13 @@ app.get("/scrape", function(req, res) {
               console.log(inserted);
             }
           });
+        console.log(i);
+        if (i === 10) {
+          return res.sendStatus(200);
+        }
       }
     });
-
   });
-  res.redirect("/")
 });
 
 // Route for retrieving all saved from the db
@@ -111,7 +113,7 @@ app.get("/saved", function(req, res) {
       // If an error occurs, send the error back to the client
       res.json(err);
     })
-  
+
 });
 
 // Route adding notes 

@@ -1,11 +1,12 @@
 $(document).ready(function() {
 
   createPage();
-
+  
   // load the page initially with articles
   function createPage() {
     //  $(".article-container").empty();
-    $.get("/").then(function(data) {});
+    //$.get("/").then(function(data) {});
+    //location.window.href = '/';
   };
 
   // when the save button is clicked, get the article ID and set its saved property to true
@@ -25,10 +26,11 @@ $(document).ready(function() {
   });
 
   $(".scrape-new").on("click", function(event) {
-    // event.preventDefault();
-    $.get("/scrape").then(
-      function(data) {
-        createPage();
+     event.preventDefault();
+    $.get("/scrape", function(data) {
+      console.log(data);
+        window.location.reload();
+        //createPage();
       }
     );
   });
