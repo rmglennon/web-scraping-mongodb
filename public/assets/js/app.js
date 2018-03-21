@@ -81,7 +81,7 @@ $(document).ready(function() {
               $("#add-note-modal").attr("data-articleId", articleId);
               $("#note-modal-title").empty();
               $(".notes-list").empty();
-              $("#note-body").empty();
+              $("#note-body").val("");
     $.ajax("/notes/article/" + articleId, {
       type: "GET"
     }).then(
