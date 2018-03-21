@@ -14,7 +14,7 @@ var app = express();
 
 // Database configuration
 var databaseUrl = "news";
-var collections = ["scrapedNews"];
+//var collections = ["scrapedNews"];
 
 // Use body-parser for handling form submissions
 app.use(bodyParser.urlencoded({
@@ -140,20 +140,17 @@ app.post("/submit/:id", function(req, res) {
   // Create a new Note in the db
   db.Note.create(req.body)
     .then(function(dbNote) {
-      return db.Article.findOneAndUpdate({
-        _id: req.params.id
-      }, {
+      var articleIdFromString = mongoose.Types.ObjectId(req.params.id)
+      return db.Article.findByIdAndUpdate(articleIdFromString, {
         $push: {
           notes: dbNote._id
         }
-      }, {
-        new: true
-      });
+      })
     })
-    .then(function(dbNote) {
-      console.log("submit ", dbNote.body);
+    .then(function(dbArticle) {
+      console.log("submit ", dbNote);
 
-      res.json(dbNote.body);
+      res.json(dbNote);
 
     })
     .catch(function(err) {
@@ -162,18 +159,35 @@ app.post("/submit/:id", function(req, res) {
     });
 });
 
+//Route for retrieving all Notes from the db
+// app.get("/notes", function(req, res) {
+//   // Find all Notes
+//   db.Note.find({})
+//     .then(function(dbNote) {
+//       // If all Notes are successfully found, send them back to the client
+//       res.json(dbNote);
+//     })
+//     .catch(function(err) {
+//       // If an error occurs, send the error back to the client
+//       res.json(err);
+//     });
+// });
+
 // Route to get all notes by ID
-app.get("/notes/:id", function(req, res) {
-  db.Article.findById(
-      req.params.id)
+app.get("/notes/article/:id", function(req, res) {
+//  var articleIdFromString = mongoose.Types.ObjectId(req.params.id);
+  db.Article.findOne({"_id":req.params.id})
     .populate("notes")
-    .then(function(dbArticle) {
-      res.json(dbArticle);
-    })
-    .catch(function(err) {
-      // If an error occurs, send it back to the client
-      res.json(err);
-    });
+    .exec (function (error, data) {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log(data);
+          //  var notes = data.notes;
+          //  res.json(notes);
+          res.json(data);
+        }
+    });        
 });
 
 

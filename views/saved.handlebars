@@ -18,18 +18,18 @@
   {{#each articles}}
     <div class="card bg-light mb-3">
       <div class="card-body">
-        <h5 class="card-title">{{this.title}}</h5>
-        <a href="{{this.link}}" class="card-link" target="_blank">View article on TechCrunch</a>
-        <p class="card-text">{{this.intro}}...</p>
-        <a data-id="{{this._id}}" class="btn btn-primary unsave-btn">Remove from saved</a>
-        <a data-id="{{this._id}}" class="btn btn-primary note-modal-btn" data-toggle="modal">Add note</a>
+        <h5 class="card-title">{{title}}</h5>
+        <a href="{{link}}" class="card-link" target="_blank">View article on TechCrunch</a>
+        <p class="card-text">{{intro}}...</p>
+        <a data-articleId={{_id}} class="btn btn-primary unsave-btn">Remove from saved</a>
+        <a data-articleId={{_id}} class="btn btn-primary note-modal-btn" data-toggle="modal">Add note</a>
       </div>
     </div>
   {{/each}}
 </div>
 
 
-<div id="add-note-modal" class="modal" tabindex="-1" role="dialog">
+<div id="add-note-modal" class="modal" tabindex="-1" role="dialog" data-articleId="">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">

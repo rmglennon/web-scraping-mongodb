@@ -15,6 +15,7 @@ $(document).ready(function() {
     var newSavedArticle = $(this).data();
     newSavedArticle.saved = true;
     console.log("saved was clicked");
+   var id = $(this).attr("data-articleID");
     $.ajax("/saved/" + newSavedArticle.id, {
       type: "PUT",
       data: newSavedArticle
@@ -39,6 +40,7 @@ $(document).ready(function() {
 
   $(".unsave-btn").on("click", function(event) {
     var newUnsavedArticle = $(this).data();
+    var id = $(this).attr("data-articleID");
     newUnsavedArticle.saved = false;
     $.ajax("/saved/" + newUnsavedArticle.id, {
       type: "PUT",
@@ -52,25 +54,49 @@ $(document).ready(function() {
 
   // when the add note button is clicked on the saved articles page, show a modal and save the note into the note collection
 
+  // Run a function to create the modal for a note
+  function createModalHTML(data) { 
+    var modalText = data.title;
+    $("#note-modal-title").text("Notes for article: " + data.title);
+    var noteItem;
+    var noteDeleteBtn;
+    for (var i = 0; i < data.notes.length; i ++) {
+      noteItem = $("<li>").text(data.notes[i].body);
+    //  noteItem.data("id", data.notes[i]._id);
+      noteDeleteBtn = $("<button> Delete </button>").addClass("btn btn-danger delete-note-modal");
+      noteDeleteBtn.attr("id", data.notes[i]._id);
+      noteItem.prepend(noteDeleteBtn, " ");
+      $(".notes-list").append(noteItem);
+    }
+  }
+
   $(".note-modal-btn").on("click", function(event) {
-    var activeArticle = $(this).data();
-    $.get("/notes/" + activeArticle.id).then(
+  //  var activeArticle = $(this).data();
+  //  console.log("active article ", activeArticle.id);
+  //  console.log(typeof activeArticle.id);
+      var articleId = $(this).attr("data-articleId");
+              $("#add-note-modal").attr("data-articleID", articleId);
+    $.ajax("/notes/article/" + articleId, {
+      type: "GET"
+    }).then(
       function(data) {
-        //location.reload();
-        console.log(data);
+        createModalHTML(data);
+      //  location.reload();
+        console.log("note modal button ", data);
         // use the article title from the response as the heading
-        var modalText = data.title;
-        $("#note-modal-title").text("Notes for article: " + data.title);
-        var noteItem;
-        var noteDeleteBtn;
-        for (var i = 0; i < data.notes.length; i ++) {
-          noteItem = $("<li>").text(data.notes[i].body);
-        //  noteItem.data("id", data.notes[i]._id);
-          noteDeleteBtn = $("<button> Delete </button>").addClass("btn btn-danger delete-note-modal");
-          noteDeleteBtn.attr("id", data.notes[i]._id);
-          noteItem.prepend(noteDeleteBtn, " ");
-          $(".notes-list").append(noteItem);
-        }
+        
+        // var modalText = data.title;
+        // $("#note-modal-title").text("Notes for article: " + data.title);
+        // var noteItem;
+        // var noteDeleteBtn;
+        // for (var i = 0; i < data.notes.length; i ++) {
+        //   noteItem = $("<li>").text(data.notes[i].body);
+        // //  noteItem.data("id", data.notes[i]._id);
+        //   noteDeleteBtn = $("<button> Delete </button>").addClass("btn btn-danger delete-note-modal");
+        //   noteDeleteBtn.attr("id", data.notes[i]._id);
+        //   noteItem.prepend(noteDeleteBtn, " ");
+        //   $(".notes-list").append(noteItem);
+        // }
       }
     );
 
@@ -78,20 +104,22 @@ $(document).ready(function() {
   });
 
   $(".note-save-btn").on("click", function(event) {
-
+    
     event.preventDefault();
-        var activeArticle = $(this).data();
+    var articleId = $("#add-note-modal").attr("data-articleID")
+      // var activeArticle = $(this).data("id");
+    //    console.log("active article: ", activeArticle);
     var newNote = {
       body: $("#note-body").val().trim()
     }
-  //  console.log(newNote);
-    $.ajax("/submit/" + activeArticle.id, {
+    console.log(newNote);
+    $.ajax("/submit/" + articleId, {
       type: "POST",
       data: newNote
     }).then(
       function(data) {
-      location.reload();
-//console.log("notes data ", data);
+    //  location.reload();
+console.log("notes data ", data);
       }
     );
   });
