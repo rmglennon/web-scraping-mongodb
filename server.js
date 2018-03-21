@@ -1,7 +1,6 @@
-// Dependencies
+// require dependencies
 var express = require("express");
 var mongoose = require("mongoose");
-// Require request and cheerio. This makes the scraping possible
 var request = require("request");
 var cheerio = require("cheerio");
 var bodyParser = require("body-parser");
@@ -9,26 +8,23 @@ var exphbs = require("express-handlebars");
 
 var PORT = process.env.PORT || 3000;
 
-// Initialize Express
+// initialize Express
 var app = express();
 
-// Database configuration
-var databaseUrl = "news";
-//var collections = ["scrapedNews"];
-
-// Use body-parser for handling form submissions
+// use body-parser for handling form submissions
 app.use(bodyParser.urlencoded({
   extended: false
 }));
 app.use(bodyParser.json({
   type: "application/json"
 }));
+
 // serve the public directory
 app.use(express.static("public"));
 
 // use promises with Mongo and connect to the database
-mongoose.Promise = Promise;
-
+var databaseUrl = "news";
+mongoose.Promise = Promise; 
 var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/news";
 mongoose.connect(MONGODB_URI);
 
@@ -41,7 +37,7 @@ app.set("view engine", "handlebars");
 // Hook mongojs configuration to the db variable
 var db = require("./models");
 
-// get all articles from the database (that are not saved)
+// get all articles from the database that are not saved
 app.get("/", function(req, res) {
 
   db.Article.find({
@@ -61,7 +57,6 @@ app.get("/", function(req, res) {
 
 // use cheerio to scrape stories from TechCrunch and store them
 app.get("/scrape", function(req, res) {
-  // Make a request for the news section of ycombinator
   request("https://techcrunch.com/", function(error, response, html) {
     // Load the html body from request into cheerio
     var $ = cheerio.load(html);
@@ -72,8 +67,8 @@ app.get("/scrape", function(req, res) {
       var link = $(element).find("a.post-block__title__link").attr("href");
       var intro = $(element).children(".post-block__content").text().trim();
 
+      // if these are present in the scraped data, create an article in the database collection
       if (title && link && intro) {
-        // Insert the data
         db.Article.create({
             title: title,
             link: link,
@@ -81,13 +76,14 @@ app.get("/scrape", function(req, res) {
           },
           function(err, inserted) {
             if (err) {
-              // Log the error if one is encountered during the query
+              // log the error if one is encountered during the query
               console.log(err);
             } else {
-              // Otherwise, log the inserted data
+              // otherwise, log the inserted data
               console.log(inserted);
             }
           });
+        // if there are 10 articles, then return the callback to the frontend
         console.log(i);
         if (i === 10) {
           return res.sendStatus(200);
@@ -97,14 +93,13 @@ app.get("/scrape", function(req, res) {
   });
 });
 
-// Route for retrieving all saved from the db
+// route for retrieving all the saved articles
 app.get("/saved", function(req, res) {
-  // Find all saved articles
   db.Article.find({
       saved: true
     })
     .then(function(dbArticle) {
-      // If all saved articles are successfully found, send them back to the client
+      // if successful, then render with the handlebars saved page
       res.render("saved", {
         articles: dbArticle
       })
@@ -116,7 +111,7 @@ app.get("/saved", function(req, res) {
 
 });
 
-// Route adding notes 
+// route for setting an article to saved
 app.put("/saved/:id", function(req, res) {
   db.Article.findByIdAndUpdate(
       req.params.id, {
@@ -130,14 +125,12 @@ app.put("/saved/:id", function(req, res) {
       })
     })
     .catch(function(err) {
-      // If an error occurs, send the error back to the client
       res.json(err);
     });
 });
 
-// Route for saving a new Note to the db and associating it with an article
+// route for saving a new note to the db and associating it with an article
 app.post("/submit/:id", function(req, res) {
-  // Create a new Note in the db
   db.Note.create(req.body)
     .then(function(dbNote) {
       var articleIdFromString = mongoose.Types.ObjectId(req.params.id)
@@ -148,10 +141,7 @@ app.post("/submit/:id", function(req, res) {
       })
     })
     .then(function(dbArticle) {
-      console.log("submit ", dbNote);
-
       res.json(dbNote);
-
     })
     .catch(function(err) {
       // If an error occurs, send it back to the client
@@ -159,32 +149,14 @@ app.post("/submit/:id", function(req, res) {
     });
 });
 
-//Route for retrieving all Notes from the db
-// app.get("/notes", function(req, res) {
-//   // Find all Notes
-//   db.Note.find({})
-//     .then(function(dbNote) {
-//       // If all Notes are successfully found, send them back to the client
-//       res.json(dbNote);
-//     })
-//     .catch(function(err) {
-//       // If an error occurs, send the error back to the client
-//       res.json(err);
-//     });
-// });
-
-// Route to get all notes by ID
+// route to find a note by ID
 app.get("/notes/article/:id", function(req, res) {
-//  var articleIdFromString = mongoose.Types.ObjectId(req.params.id);
   db.Article.findOne({"_id":req.params.id})
     .populate("notes")
     .exec (function (error, data) {
         if (error) {
             console.log(error);
         } else {
-            console.log(data);
-          //  var notes = data.notes;
-          //  res.json(notes);
           res.json(data);
         }
     });        
@@ -202,7 +174,7 @@ app.get("/notes/:id", function(req, res) {
   });
 });
 
-// Listen on port 3000
+// listen for the routes
 app.listen(PORT, function() {
-  console.log("App running on port 3000!");
+  console.log("App is running");
 });

@@ -1,21 +1,19 @@
 $(document).ready(function() {
 
-  createPage();
-  
-  // load the page initially with articles
-  function createPage() {
-    //  $(".article-container").empty();
-    //$.get("/").then(function(data) {});
-    //location.window.href = '/';
-  };
+  // createPage();
+  // 
+  // // load the page initially with articles
+  // function createPage() {
+  //   location.window.href = '/';
+  // };
+
 
   // when the save button is clicked, get the article ID and set its saved property to true
   $(".save-btn").on("click", function(event) {
-
     var newSavedArticle = $(this).data();
     newSavedArticle.saved = true;
     console.log("saved was clicked");
-   var id = $(this).attr("data-articleid");
+    var id = $(this).attr("data-articleid");
     $.ajax("/saved/" + id, {
       type: "PUT",
       data: newSavedArticle
@@ -26,14 +24,12 @@ $(document).ready(function() {
     );
   });
 
+// get new articles when the button is clicked
   $(".scrape-new").on("click", function(event) {
-     event.preventDefault();
+    event.preventDefault();
     $.get("/scrape", function(data) {
-      console.log(data);
-        window.location.reload();
-        //createPage();
-      }
-    );
+      window.location.reload();
+    });
   });
 
   // when the button to removed a saved article from the saved list, get the article ID and set its saved property back to false
@@ -52,20 +48,18 @@ $(document).ready(function() {
     );
   });
 
-  // when the add note button is clicked on the saved articles page, show a modal and save the note into the note collection
-
-  // Run a function to create the modal for a note
-  function createModalHTML(data) { 
+  // generate the text inside the notes modal
+  function createModalHTML(data) {
     var modalText = data.title;
     $("#note-modal-title").text("Notes for article: " + data.title);
     var noteItem;
     var noteDeleteBtn;
-    console.log("data notes legnth ", data.notes.length )
-    for (var i = 0; i < data.notes.length; i ++) {
+    console.log("data notes legnth ", data.notes.length)
+    for (var i = 0; i < data.notes.length; i++) {
       noteItem = $("<li>").text(data.notes[i].body);
       noteItem.addClass("note-item-list");
       noteItem.attr("id", data.notes[i]._id);
-    //  noteItem.data("id", data.notes[i]._id);
+      //  noteItem.data("id", data.notes[i]._id);
       noteDeleteBtn = $("<button> Delete </button>").addClass("btn btn-danger delete-note-modal");
       noteDeleteBtn.attr("data-noteId", data.notes[i]._id);
       noteItem.prepend(noteDeleteBtn, " ");
@@ -73,48 +67,30 @@ $(document).ready(function() {
     }
   }
 
+  // when the add note button is clicked on the saved articles page, show a modal. Empty the contents first.
   $(".note-modal-btn").on("click", function(event) {
-  //  var activeArticle = $(this).data();
-  //  console.log("active article ", activeArticle.id);
-  //  console.log(typeof activeArticle.id);
-      var articleId = $(this).attr("data-articleId");
-              $("#add-note-modal").attr("data-articleId", articleId);
-              $("#note-modal-title").empty();
-              $(".notes-list").empty();
-              $("#note-body").val("");
+    var articleId = $(this).attr("data-articleId");
+    $("#add-note-modal").attr("data-articleId", articleId);
+    $("#note-modal-title").empty();
+    $(".notes-list").empty();
+    $("#note-body").val("");
     $.ajax("/notes/article/" + articleId, {
       type: "GET"
     }).then(
       function(data) {
         createModalHTML(data);
-      //  location.reload();
-        console.log("note modal button ", data);
-        // use the article title from the response as the heading
-        
-        // var modalText = data.title;
-        // $("#note-modal-title").text("Notes for article: " + data.title);
-        // var noteItem;
-        // var noteDeleteBtn;
-        // for (var i = 0; i < data.notes.length; i ++) {
-        //   noteItem = $("<li>").text(data.notes[i].body);
-        // //  noteItem.data("id", data.notes[i]._id);
-        //   noteDeleteBtn = $("<button> Delete </button>").addClass("btn btn-danger delete-note-modal");
-        //   noteDeleteBtn.attr("id", data.notes[i]._id);
-        //   noteItem.prepend(noteDeleteBtn, " ");
-        //   $(".notes-list").append(noteItem);
-        // }
       }
     );
 
+    // show the modal
     $("#add-note-modal").modal("toggle");
   });
 
+  // save a note into the database
+  // TODO: add better form validation
   $(".note-save-btn").on("click", function(event) {
-    
     event.preventDefault();
     var articleId = $("#add-note-modal").attr("data-articleId")
-      // var activeArticle = $(this).data("id");
-    //    console.log("active article: ", activeArticle);
     var newNote = {
       body: $("#note-body").val().trim()
     }
@@ -123,40 +99,20 @@ $(document).ready(function() {
       type: "POST",
       data: newNote
     }).then(
-      function(data) {
-    //  location.reload();
-console.log("notes data ", data);
-      }
+      function(data) {}
     );
   });
 
-$(document).on("click", ".delete-note-modal", function(event) {
-    //console.log("delete was clicked");
-    // var activeNote = $(this);
-  //  console.log($(this).attr("id"));
+  // delete the note that was clicked and remove the whole <li> because the text and delete button are included
+  $(document).on("click", ".delete-note-modal", function(event) {
     var noteID = $(this).attr("data-noteId");
-    console.log(noteID);
 
     $.ajax("/notes/" + noteID, {
       type: "GET"
     }).then(
       function(data) {
-        $("#"+noteID).remove();
-      //  $(this).find(noteID).remove();
-        //console.log($(this).find(".note-item-list"));
-        // use the article title from the response as the heading
-        
-        //    var test = data.notes[0].body;
-        //    console.log(test);
+        $("#" + noteID).remove();
       })
   });
-  
-  
-//   $(document).on("click", ".delete-note", function(){
-//   var noteID = $(this).attr("data-noteId");
-//   $.get("/deletenote/"+noteID, function(data){
-//     $("#"+noteID).remove();
-//   });
-// });
 
 });

@@ -1,16 +1,16 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-<a class="navbar-brand" href="#">Tech News Scraper</a>
-<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-  <div class="navbar-nav">
-    <a class="nav-item nav-link" href="/">Home</a>
-    <a class="nav-item nav-link active" href="/saved">Saved articles</a>
+  <a class="navbar-brand" href="#">Tech News Scraper</a>
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="navbar-nav">
+      <a class="nav-item nav-link" href="/">Home</a>
+      <a class="nav-item nav-link active" href="/saved">Saved articles</a>
+    </div>
   </div>
-</div>
 </nav>
 
 <div class="jumbotron jumbotron-fluid text-center">
-<h1 class="display-4">Tech News</h1>
-<p class="lead">Get the latest tech news from TechCrunch</p>
+  <h1 class="display-4">Tech News</h1>
+  <p class="lead">Get the latest from TechCrunch</p>
 </div>
 
 <div class="container">
@@ -21,8 +21,8 @@
         <h5 class="card-title">{{title}}</h5>
         <a href="{{link}}" class="card-link" target="_blank">View article on TechCrunch</a>
         <p class="card-text">{{intro}}...</p>
-        <a data-articleId={{_id}} class="btn btn-primary unsave-btn">Remove from saved</a>
-        <a data-articleId={{_id}} class="btn btn-primary note-modal-btn" data-toggle="modal">Add note</a>
+        <a data-articleId= {{_id}} class="btn btn-primary unsave-btn">Remove from saved</a>
+        <a data-articleId= {{_id}} class="btn btn-primary note-modal-btn" data-toggle="modal">Add note</a>
       </div>
     </div>
   {{/each}}
@@ -36,12 +36,11 @@
         <h5 id="note-modal-title" class="modal-title"></h5>
       </div>
       <div class="modal-body container">
-        <!-- <p class="existing-notes-body"></p> -->
         <ul class="notes-list">
         </ul>
         <div class="form-group">
           <label for="note-area">New note</label>
-          <textarea name="new-note-area" class="form-control" id="note-body" rows="2" placeholder="" required></textarea>
+          <textarea name="new-note-area" class="form-control" id="note-body" rows="2" required></textarea>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>

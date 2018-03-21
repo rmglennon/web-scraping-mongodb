@@ -1,5 +1,5 @@
 .jumbotron {
-  background: url("/assets/img/circuit-board.jpeg") no-repeat center center;
+  background: url("/assets/img/laptop.jpeg") no-repeat center center;
 }
 
 .display-4 {
@@ -15,4 +15,8 @@
 .btn-primary {
   background-color: #345c43;
   color: white !important;
+}
+
+.note-item-list {
+  padding: 5px;
 }
