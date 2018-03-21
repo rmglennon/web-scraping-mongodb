@@ -60,6 +60,7 @@ $(document).ready(function() {
     $("#note-modal-title").text("Notes for article: " + data.title);
     var noteItem;
     var noteDeleteBtn;
+    console.log("data notes legnth ", data.notes.length )
     for (var i = 0; i < data.notes.length; i ++) {
       noteItem = $("<li>").text(data.notes[i].body);
     //  noteItem.data("id", data.notes[i]._id);
@@ -76,6 +77,9 @@ $(document).ready(function() {
   //  console.log(typeof activeArticle.id);
       var articleId = $(this).attr("data-articleId");
               $("#add-note-modal").attr("data-articleID", articleId);
+              $("#note-modal-title").empty();
+              $(".notes-list").empty();
+              $("#note-body").empty();
     $.ajax("/notes/article/" + articleId, {
       type: "GET"
     }).then(
